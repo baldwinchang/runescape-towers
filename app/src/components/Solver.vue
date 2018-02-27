@@ -1,6 +1,6 @@
 <template>
   <div class="hello">
-    <h1>RuneScape - Tower Solver</h1>
+    <h1>RuneScape - Tower Puzzle Solver</h1>
     <h3>Treasure Trails - Master Clue Scrolls</h3>
     <div>
       <p style="color:grey">
@@ -18,123 +18,27 @@
       </p>
       <p v-if="loading">Attempting to solve...</p>
     </div>
-    <form>
-      <table style="margin: auto">
-        <tr>
-          <td></td>
-          <td>
-            <input type="number" min="1" :max="size" required v-model="columnConstraints[0][0]" />
-          </td>
-          <td>
-            <input type="number" min="1" :max="size" required v-model="columnConstraints[1][0]" />
-          </td>
-          <td>
-            <input type="number" min="1" :max="size" required v-model="columnConstraints[2][0]" />
-          </td>
-          <td>
-            <input type="number" min="1" :max="size" required v-model="columnConstraints[3][0]" />
-          </td>
-          <td>
-            <input type="number" min="1" :max="size" required v-model="columnConstraints[4][0]" />
-          </td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>
-            <input type="number" min="1" :max="size" required v-model="rowConstraints[0][0]" />
-          </td>
-          <td>{{ answer[0][0] }}</td>
-          <td>{{ answer[0][1] }}</td>
-          <td>{{ answer[0][2] }}</td>
-          <td>{{ answer[0][3] }}</td>
-          <td>{{ answer[0][4] }}</td>
-          <td>
-            <input type="number" min="1" :max="size" required v-model="rowConstraints[0][1]" />
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <input type="number" min="1" :max="size" required v-model="rowConstraints[1][0]" />
-          </td>
-          <td>{{ answer[1][0] }}</td>
-          <td>{{ answer[1][1] }}</td>
-          <td>{{ answer[1][2] }}</td>
-          <td>{{ answer[1][3] }}</td>
-          <td>{{ answer[1][4] }}</td>
-          <td>
-            <input type="number" min="1" :max="size" required v-model="rowConstraints[1][1]" />
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <input type="number" min="1" :max="size" required v-model="rowConstraints[2][0]" />
-          </td>
-          <td>{{ answer[2][0] }}</td>
-          <td>{{ answer[2][1] }}</td>
-          <td>{{ answer[2][2] }}</td>
-          <td>{{ answer[2][3] }}</td>
-          <td>{{ answer[2][4] }}</td>
-          <td>
-            <input type="number" min="1" :max="size" required v-model="rowConstraints[2][1]" />
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <input type="number" min="1" :max="size" required v-model="rowConstraints[3][0]" />
-          </td>
-          <td>{{ answer[3][0] }}</td>
-          <td>{{ answer[3][1] }}</td>
-          <td>{{ answer[3][2] }}</td>
-          <td>{{ answer[3][3] }}</td>
-          <td>{{ answer[3][4] }}</td>
-          <td>
-            <input type="number" min="1" :max="size" required v-model="rowConstraints[3][1]" />
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <input type="number" min="1" :max="size" required v-model="rowConstraints[4][0]" />
-          </td>
-          <td>{{ answer[4][0] }}</td>
-          <td>{{ answer[4][1] }}</td>
-          <td>{{ answer[4][2] }}</td>
-          <td>{{ answer[4][3] }}</td>
-          <td>{{ answer[4][4] }}</td>
-          <td>
-            <input type="number" min="1" :max="size" required v-model="rowConstraints[4][1]" />
-          </td>
-        </tr>
 
-        <tr>
-          <td></td>
-          <td>
-            <input type="number" min="1" :max="size" required v-model="columnConstraints[0][1]" />
-          </td>
-          <td>
-            <input type="number" min="1" :max="size" required v-model="columnConstraints[1][1]" />
-          </td>
-          <td>
-            <input type="number" min="1" :max="size" required v-model="columnConstraints[2][1]" />
-          </td>
-          <td>
-            <input type="number" min="1" :max="size" required v-model="columnConstraints[3][1]" />
-          </td>
-          <td>
-            <input type="number" min="1" :max="size" required v-model="columnConstraints[4][1]" />
-          </td>
-          <td></td>
-        </tr>
-      </table>
-      <button :disabled="loading" @click="solve">
-        Solve!
-      </button>
-    </form>
+    <board
+      :size="size"
+      :board="board"
+      :constraints="constraints"
+      @constraint:increment="increment"
+      @constraint:decrement="decrement"
+    />
+
+    <button :disabled="loading" @click="solve">
+      Solve!
+    </button>
+
   </div>
 </template>
 
 <script>
 import solveBoard from '@/utility/solve';
+import Board from './Board';
 
+/*
 const exampleBoard = [
   [5, 1, 2, 4, 3],
   [4, 5, 3, 1, 2],
@@ -158,6 +62,7 @@ const exampleColumnConstraints = [
   [2, 1],
   [3, 2],
 ];
+*/
 
 export default {
   data() {
@@ -165,24 +70,64 @@ export default {
       loading: false,
       error: false,
       size: 5,
-      answer: exampleBoard,
-      rowConstraints: exampleRowConstraints,
-      columnConstraints: exampleColumnConstraints,
+      constraints: {
+        row: [],
+        column: [],
+      },
+      board: [],
       solveBoard,
     };
   },
+  created() {
+    this.setDefaults();
+  },
   methods: {
+    setDefaults() {
+      for (let i = 0; i < this.size; i += 1) {
+        this.constraints.row.push([2, 3]);
+        this.constraints.column.push([2, 3]);
+        this.board.push([...Array(this.size).keys()].map(() => 'X'));
+      }
+    },
     solve() {
       try {
         this.loading = true;
         this.error = false;
-        this.answer = this.solveBoard(this.size, this.rowConstraints, this.columnConstraints);
+        this.board = solveBoard(this.size, this.constraints.row, this.constraints.column);
       } catch (e) {
         this.error = true;
       } finally {
         this.loading = false;
       }
     },
+    increment(type, index, bound) {
+      if (type === 'column') {
+        const { column } = this.constraints;
+        column[index][bound] = this.boundValue(column[index][bound] + 1);
+        this.$set(this.constraints.column, index, column[index]);
+      } else {
+        const { row } = this.constraints;
+        row[index][bound] = this.boundValue(row[index][bound] + 1);
+        this.$set(this.constraints.row, index, row[index]);
+      }
+    },
+    decrement(type, index, bound) {
+      if (type === 'column') {
+        const { column } = this.constraints;
+        column[index][bound] = this.boundValue(column[index][bound] - 1);
+        this.$set(this.constraints.column, index, column[index]);
+      } else {
+        const { row } = this.constraints;
+        row[index][bound] = this.boundValue(row[index][bound] - 1);
+        this.$set(this.constraints.row, index, row[index]);
+      }
+    },
+    boundValue(value) {
+      return Math.max(1, Math.min(this.size, value));
+    },
+  },
+  components: {
+    Board,
   },
 };
 </script>
