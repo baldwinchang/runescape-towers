@@ -2,11 +2,11 @@
   <div id="app">
     <router-view/>
 
-    <center style="margin-top:25px;">
-      By Baldwin C (RSN: Baldwin)<br />
+    <center style="margin-top:25px;margin-bottom:15px;">
+      Created by Baldwin<br />
       <small>
         &copy; 2018. All rights reserved. This site is not affiliated nor endorsed by Jagex Ltd.
-        Join <a href="http://www.runescape.com" target="_blank">RuneScape</a> to play minigames like this.
+        Join <a href="http://www.runescape.com" target="_blank">RuneScape</a> to start your adventure.
       </small>
 
     </center>

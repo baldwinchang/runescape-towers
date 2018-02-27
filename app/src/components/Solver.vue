@@ -10,6 +10,14 @@
           href="http://runescape.wikia.com/wiki/Towers_puzzle_scroll"
           target="_blank">RSWiki/Towers Puzzle Scroll</a>)
       </p>
+      <p>
+        <strong>Puzzle size:</strong><br />
+        <constraint
+          :value="size"
+          @increment="() => adjustPuzzleSize(1)"
+          @decrement="() => adjustPuzzleSize(-1)"
+        />
+      </p>
       <p v-if="error">
         <strong style="color:red">
           There was an error solving for an answer. There may not be a valid
@@ -27,16 +35,24 @@
       @constraint:decrement="decrement"
     />
 
-    <button :disabled="loading" @click="solve">
+    <p v-if="timer.diff"><small>Solved in {{ timer.diff / 1000 }}s</small></p>
+
+    <button :disabled="loading" @click="solve" class="btn-success">
       Solve!
+    </button>
+
+    <button :disabled="loading" @click="setDefaults"  style="margin-left: 30px;">
+      Random Puzzle
     </button>
 
   </div>
 </template>
 
 <script>
-import solveBoard from '@/utility/solve';
+import { solveBoard, generateRandomBoard, calculateConstraints } from '@/utility/solve';
+
 import Board from './Board';
+import Constraint from './Constraint';
 
 /*
 const exampleBoard = [
@@ -75,6 +91,12 @@ export default {
         column: [],
       },
       board: [],
+
+      timer: {
+        start: null,
+        diff: null,
+      },
+
       solveBoard,
     };
   },
@@ -83,14 +105,33 @@ export default {
   },
   methods: {
     setDefaults() {
+      // Reset State
+      this.constraints = {
+        row: [],
+        column: [],
+      };
+      this.board = [];
+
+      // This makes for a more realistic and fun page
+      // Having a legit puzzle generated!
+      const randomBoard = generateRandomBoard(this.size);
+      this.constraints = calculateConstraints(randomBoard);
+
+      // this.board = randomBoard;
+
       for (let i = 0; i < this.size; i += 1) {
-        this.constraints.row.push([2, 3]);
-        this.constraints.column.push([2, 3]);
+        /* const a = Math.floor(this.size / 2);
+        const b = this.size - a;
+        this.constraints.row.push([a, b]);
+        this.constraints.column.push([a, b]); */
         this.board.push([...Array(this.size).keys()].map(() => 'X'));
       }
     },
     solve() {
       try {
+        this.timer.start = Date.now();
+        this.timer.diff = null;
+
         this.loading = true;
         this.error = false;
         this.board = solveBoard(this.size, this.constraints.row, this.constraints.column);
@@ -98,6 +139,7 @@ export default {
         this.error = true;
       } finally {
         this.loading = false;
+        this.timer.diff = Date.now() - this.timer.start;
       }
     },
     increment(type, index, bound) {
@@ -125,9 +167,14 @@ export default {
     boundValue(value) {
       return Math.max(1, Math.min(this.size, value));
     },
+    adjustPuzzleSize(delta) {
+      this.size = Math.max(1, Math.min(12, this.size + delta));
+      this.setDefaults();
+    },
   },
   components: {
     Board,
+    Constraint,
   },
 };
 </script>

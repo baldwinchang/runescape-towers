@@ -76,7 +76,7 @@ function nextUnfilledSpot(board) {
 
 function extractRow(board, i) {
   if (i > board.length) throw new Error('N is too large for this board');
-  return board[i];
+  return [...board[i]];
 }
 
 function extractColumn(board, j) {
@@ -116,7 +116,7 @@ function isBoardValid(board, rowConstraints, columnConstraints, n) {
   return true;
 }
 
-export default function solveBoard(n, rowConstraints, columnConstraints) {
+export function solveBoard(n, rowConstraints, columnConstraints) {
   const board = [...Array(n)].map(k => [...Array(n)].map(p => null));
 
   function solve(board) {
@@ -138,10 +138,69 @@ export default function solveBoard(n, rowConstraints, columnConstraints) {
     return false;
   }
   const success = solve(board);
-  console.log(board, n, rowConstraints, columnConstraints);
   if (!success) throw new Error('Could not solve puzzle.');
 
   return board;
+}
+
+/**
+ * Randomize array element order in-place.
+ * Using Durstenfeld shuffle algorithm.
+ */
+function shuffleArray(array) {
+  for (var i = array.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var temp = array[i];
+      array[i] = array[j];
+      array[j] = temp;
+  }
+}
+
+export function generateRandomBoard(size) {
+const board = [...Array(size)].map(k => [...Array(size)].map(p => null));
+
+  function generate(board) {
+
+    if (isBoardFull(board)) return true;
+    const [row, col] = nextUnfilledSpot(board);
+    let possible = possibleMoves(board, size, row, col);
+    shuffleArray(possible);
+
+    for (let i = 0; i < possible.length; i += 1) {
+      board[row][col] = possible[i];
+
+      if (generate(board)) {
+        return true;
+      }
+
+      board[row][col] = null;
+    }
+    return false;
+  }
+  const success = generate(board);
+  if (!success) throw new Error('Could not generate puzzle.');
+
+  return board;
+}
+
+export function calculateConstraints(board) {
+  const rowConstraints = [];
+  const columnConstraints = [];
+
+  for (let i = 0; i < board.length; i += 1) {
+    const row = extractRow(board, i);
+    const column = extractColumn(board, i);
+
+    rowConstraints.push([countIncreasingHeights(row), 
+      countIncreasingHeights(row.reverse())]);
+
+    columnConstraints.push([countIncreasingHeights(column), 
+      countIncreasingHeights(column.reverse())]);
+  }
+  return {
+    row: rowConstraints,
+    column: columnConstraints,
+  };
 }
 
 /* test

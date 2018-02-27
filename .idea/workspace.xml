@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8d07a145-0b63-44b4-b33a-3c1e1c06859b" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/App.vue" afterPath="$PROJECT_DIR$/app/src/App.vue" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/components/Solver.vue" afterPath="$PROJECT_DIR$/app/src/components/Solver.vue" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/utility/solve.js" afterPath="$PROJECT_DIR$/app/src/utility/solve.js" />
     </list>
