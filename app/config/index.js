@@ -9,7 +9,7 @@ module.exports = {
 
     // Paths
     assetsSubDirectory: 'static',
-    assetsPublicPath: '/',
+    assetsPublicPath: '/runescape-towers/',
     proxyTable: {},
 
     // Various Dev Server settings
